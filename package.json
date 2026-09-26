@@ -1,0 +1,29 @@
+{
+  "name": "secondbrain",
+  "version": "1.0.0",
+  "description": "A personal knowledge base: ingest your documents, search them by meaning and by keyword, and get answers with verifiable citations.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test test/chunk.test.js test/search.test.js test/answer.test.js",
+    "doctor": "node scripts/doctor.js",
+    "setup:local": "npm install @huggingface/transformers && node scripts/download-model.js",
+    "reindex": "node scripts/reindex.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.0",
+    "better-sqlite3": "^13.0.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mammoth": "^1.8.0",
+    "multer": "^2.0.0",
+    "pdf-parse": "^2.4.5",
+    "sqlite-vec": "^0.1.9"
+  },
+  "license": "MIT"
+}

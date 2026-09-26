@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Second Brain — ask your own documents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="wordmark" href="#" aria-label="Second Brain">Second&nbsp;Brain</a>
+      <nav class="views">
+        <button class="view-btn is-active" data-view="ask">Ask</button>
+        <button class="view-btn" data-view="library">Library <span id="docCount" class="chip"></span></button>
+      </nav>
+      <div class="topbar-status" id="statusLine"></div>
+    </div>
+  </header>
+
+  <div id="setupBanner" class="banner" hidden></div>
+
+  <main>
+    <!-- ================= ASK ================= -->
+    <section id="view-ask" class="view is-active">
+      <div class="ask-head">
+        <h1>Ask your own documents.</h1>
+        <p class="lede">Every answer is built only from what you've indexed, and every claim carries a quote you can open and check.</p>
+      </div>
+
+      <form id="askForm" class="ask-box">
+        <textarea id="question" rows="2" placeholder="e.g. What did my networking notes say about the TCP handshake?" autocomplete="off"></textarea>
+        <div class="ask-controls">
+          <label class="mini">
+            <span>Mode</span>
+            <select id="askMode">
+              <option value="answer" selected>Answer with citations</option>
+              <option value="search">Search only</option>
+            </select>
+          </label>
+          <label class="mini">
+            <span>Within</span>
+            <select id="collectionFilter"><option value="">Everything</option></select>
+          </label>
+          <button type="submit" class="btn btn-primary" id="askBtn">Ask</button>
+        </div>
+      </form>
+
+      <div id="askEmpty" class="empty">
+        <p>Your library is empty. Add a PDF, a DOCX or some notes and they become searchable in seconds.</p>
+        <button class="btn btn-primary" data-goto-library>Add documents</button>
+      </div>
+
+      <div id="askLoading" class="loading" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="askLoadingText">Searching your library…</p>
+      </div>
+
+      <article id="answerPanel" class="answer-panel" hidden></article>
+      <section id="resultsPanel" class="results-panel" hidden></section>
+
+      <div id="recentQueries" class="recent"></div>
+    </section>
+
+    <!-- ================= LIBRARY ================= -->
+    <section id="view-library" class="view">
+      <h1>Library</h1>
+      <p class="lede">Everything here lives in one file on this computer. Indexing happens in the background — you can keep working.</p>
+
+      <div class="add-grid">
+        <form id="uploadForm" class="add-card">
+          <h2>Add files</h2>
+          <label class="dropzone" id="dropzone">
+            <input type="file" id="fileInput" multiple hidden
+                   accept=".pdf,.docx,.txt,.md,.markdown,.html,.htm,.json,.csv" />
+            <strong id="dropTitle">Drop files here, or click to choose</strong>
+            <span id="dropHint">PDF, DOCX, TXT, MD, HTML — up to 50 MB each</span>
+          </label>
+          <label class="field">
+            <span>Collection <em class="opt">optional</em></span>
+            <input type="text" id="uploadCollection" list="collectionList" placeholder="e.g. Networking" maxlength="80" />
+            <datalist id="collectionList"></datalist>
+          </label>
+          <button type="submit" class="btn btn-primary" id="uploadBtn">Add to library</button>
+        </form>
+
+        <form id="noteForm" class="add-card">
+          <h2>Paste a note</h2>
+          <label class="field">
+            <span>Title</span>
+            <input type="text" id="noteTitle" placeholder="Lecture 4 — transport layer" maxlength="200" />
+          </label>
+          <label class="field">
+            <span>Text</span>
+            <textarea id="noteText" rows="6" placeholder="Paste an article, your notes, anything worth keeping. Markdown headings help it index well."></textarea>
+          </label>
+          <button type="submit" class="btn btn-quiet" id="noteBtn">Add note</button>
+        </form>
+      </div>
+
+      <h2 class="section-title">Documents</h2>
+      <div id="docList" class="doc-list"></div>
+    </section>
+  </main>
+
+  <!-- ================= SOURCE DIALOG ================= -->
+  <dialog id="sourceDialog" class="modal">
+    <div class="modal-body">
+      <div class="modal-head">
+        <div>
+          <h2 id="sourceTitle">Source</h2>
+          <p id="sourceMeta" class="subtle"></p>
+        </div>
+        <button type="button" class="icon-btn" data-close aria-label="Close">×</button>
+      </div>
+      <div id="sourceBody" class="source-body"></div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-quiet" id="moreContext">Show surrounding text</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-primary" data-close>Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toasts" class="toasts" popover="manual" aria-live="polite"></div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
