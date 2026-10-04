@@ -47,7 +47,11 @@ test.before(async () => {
   }
 });
 
-test.after(() => fs.rmSync(process.env.DB_FILE, { force: true }));
+test.after(() => {
+  // Windows refuses to delete a file that is still open.
+  db.close();
+  for (const suffix of ['', '-wal', '-shm']) fs.rmSync(process.env.DB_FILE + suffix, { force: true });
+});
 
 test('FTS query is built safely from free text', () => {
   assert.equal(buildFtsQuery('Ce este un handshake?'), '"handshake"*');

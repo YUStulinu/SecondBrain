@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Server code is CommonJS; files under public/js are browser ES modules.
+      - name: Syntax check
+        run: |
+          for f in $(git ls-files '*.js' ':!public/js/*'); do node --check "$f"; done
+          for f in $(git ls-files 'public/js/*.js'); do node --input-type=module --check < "$f"; done
+
+      - name: Unit tests
+        run: npm test
+
+      # Start the real server (with a placeholder API key; no AI call is made)
+      # and check that it serves the app.
+      - name: Smoke test
+        run: |
+          PORT=3999 ANTHROPIC_API_KEY=ci-placeholder EMBEDDING_PROVIDER=hash node server.js > server.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:3999/ > /dev/null && break; sleep 1; done
+          curl -sf http://localhost:3999/ > /dev/null || { cat server.log; exit 1; }
+          echo "server is up"
