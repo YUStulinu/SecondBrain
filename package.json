@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node --test test/chunk.test.js test/search.test.js test/answer.test.js",
+    "test": "node --test \"test/*.test.js\"",
     "doctor": "node scripts/doctor.js",
     "setup:local": "npm install @huggingface/transformers && node scripts/download-model.js",
     "reindex": "node scripts/reindex.js"
