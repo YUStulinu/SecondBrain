@@ -1,8 +1,11 @@
 {
   "name": "secondbrain",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A personal knowledge base: ingest your documents, search them by meaning and by keyword, and get answers with verifiable citations.",
   "main": "server.js",
+  "bin": {
+    "brain": "bin/brain.js"
+  },
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",

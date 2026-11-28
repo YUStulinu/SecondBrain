@@ -157,6 +157,42 @@ Collections are optional labels — put your Networking course in one and your w
 
 ---
 
+## From an AI agent (Claude Code, Codex, Cursor)
+
+An agent can write the answer itself, so it needs no Anthropic key. What it can't do alone is keep
+a searchable index of your files or prove its quotes. The `brain` command line covers both, with
+the same code the app uses. The [Second Brain skill on Agensi](https://agensi.io/skills/search-your-documents-with-checked-citations)
+works this way:
+
+```bash
+node bin/brain.js add notes/*.md report.pdf --collection work   # index, and wait until done
+node bin/brain.js search "how much can I spend without approval" # hybrid search, passages as JSON
+node bin/brain.js show 12 --around 1                              # a passage with its neighbours
+node bin/brain.js check answer.json                               # the citation check
+node bin/brain.js list                                            # what is indexed
+```
+
+`answer.json` is the agent's answer, `{"answer": "... [S1] ...", "citations": [{"marker": "S1",
+"passageId": 12, "quote": "..."}]}`. `check` runs the app's verifier. It keeps a citation only if
+its passage exists and the quote is in it, and it turns the claim of a failed citation into
+`[unverified]`.
+
+The samples in [samples/](samples/) are written for the demo: lecture notes, a team handbook and an
+incident postmortem. Indexed with the local model, they gave 20 passages in under 3 seconds. Then:
+
+- **Search by meaning.** "How much can I spend without asking anyone first?" found the expenses
+  rule first, though the passage says "approval", not "asking".
+- **Checking an answer.** Claude wrote an answer with five citations. Two were wrong on purpose:
+  claims expire after 60 days where the handbook says 90, and a 1,000 EUR budget where it says 500.
+  `check` kept the three right ones, marked the two wrong claims `[unverified]`, and lowered the
+  confidence from high to partial.
+
+That second test found a gap in the check. A quote's words only had to be 85% present, and numbers
+are too short to count as words, so "60 days" passed for "90 days". Every number in a quote must
+now be in the passage as written, in the app and in `brain` alike.
+
+---
+
 ## Cost and privacy
 
 | | |
@@ -175,6 +211,7 @@ Everything is stored in `data/brain.db`. The server listens on `127.0.0.1`, so n
 ```
 secondbrain/
 ├── server.js               # REST API and the SSE progress stream
+├── bin/brain.js            # the command line, for AI agents and scripts
 ├── lib/
 │   ├── db.js               # schema, migrations, FTS5 + sqlite-vec
 │   ├── extract.js          # PDF / DOCX / HTML → text, page maps, reflow
@@ -191,7 +228,8 @@ secondbrain/
 │   ├── doctor.js           # environment check
 │   ├── download-model.js   # pre-fetch the local model
 │   └── reindex.js          # rebuild after changing model
-└── test/                   # 28 tests
+├── samples/                # three English documents written for the demo
+└── test/                   # 38 tests
 ```
 
 No framework and no build step: plain ES modules, native `<dialog>`, inline SVG.
@@ -221,14 +259,4 @@ Because the extracted text is kept alongside each document, this rebuilds locall
 - **Vector search is exact, not approximate.** `sqlite-vec` scans every vector, which is fast up to roughly 100k passages — comfortably more than a personal library. Beyond that you'd want an ANN index or Postgres with pgvector, and the schema maps across cleanly.
 - **No reranking model.** RRF fusion does the merging. A cross-encoder reranker would improve the top few results at the cost of another model download.
 - **One user, one machine.** No accounts, no sharing — by design.
-
-## Pushing to GitHub
-
-```bash
-git init
-git add .
-git commit -m "Second Brain: hybrid-retrieval knowledge base with verified citations"
-git branch -M main
-git remote add origin <your_repo_url>
-git push -u origin main
-```
+- **The check proves quotes, not reasoning.** It confirms that every quoted sentence and number is in the passage it names. It does not judge whether the claim beside the quote says the same thing.

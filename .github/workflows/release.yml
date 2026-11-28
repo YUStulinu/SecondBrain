@@ -1,0 +1,44 @@
+name: Release
+
+# Push a tag like v1.1.0: the tested source is packed into one archive (the app, the `brain` command
+# line and the sample documents) and attached to a GitHub release. Before it is published, the
+# archive is unpacked outside the repository, installed with npm ci, and used the way an AI agent
+# uses it: the samples indexed, searched, and an answer's citations checked.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Package
+        run: git archive --format=zip --prefix="secondbrain-${GITHUB_REF_NAME}/" -o "secondbrain-${GITHUB_REF_NAME}.zip" HEAD
+      - name: Check the archive from outside the repository
+        env:
+          EMBEDDING_PROVIDER: hash
+        run: |
+          name="secondbrain-${GITHUB_REF_NAME}"
+          cd "$RUNNER_TEMP" && unzip -q "$GITHUB_WORKSPACE/$name.zip" && cd "$name"
+          npm ci --omit=dev
+          node bin/brain.js add samples/*.md | tee added.json
+          grep -q '"status": "ready"' added.json
+          node bin/brain.js search "expenses approval" --limit 3 | tee found.json
+          id=$(node -e "console.log(JSON.parse(require('fs').readFileSync('found.json','utf8')).results[0].id)")
+          printf '{"answer":"Up to 100 EUR needs no approval [S1].","citations":[{"marker":"S1","passageId":%s,"quote":"Expenses up to 100 EUR need no approval beforehand"}],"confidence":"high"}' "$id" > answer.json
+          node bin/brain.js check answer.json | tee checked.json
+          grep -q '"kept": 1' checked.json
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: secondbrain-*.zip

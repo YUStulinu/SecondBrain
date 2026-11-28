@@ -92,6 +92,14 @@ test('citation checking accepts real quotes and rejects invented ones', () => {
   assert.equal(quoteAppearsIn('TCP folosește un algoritm de criptare AES', chunk), false);
 });
 
+test('a quote with a changed number is rejected, though its words all match', () => {
+  const policy = 'Submit receipts within 30 days; claims older than 90 days are not reimbursed.';
+  assert.equal(quoteAppearsIn('claims older than 90 days are not reimbursed', policy), true);
+  assert.equal(quoteAppearsIn('claims older than 60 days are not reimbursed', policy), false);
+  assert.equal(quoteAppearsIn('claims older than 9 days, are not reimbursed', policy), false);
+  assert.equal(quoteAppearsIn('Submit receipts within 30 days. Claims older than 90 days', policy), true);
+});
+
 test('highlighting marks the query words, diacritics included', () => {
   const { html } = highlight('Se stabilește o conexiune prin handshake.', 'conexiune handshake');
   assert.match(html, /<mark>conexiune<\/mark>/);
