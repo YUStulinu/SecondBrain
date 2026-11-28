@@ -131,6 +131,8 @@ main { max-width: 1060px; margin: 0 auto; padding: 30px 24px 80px; }
 .ask-controls { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 11px; }
 .ask-controls .btn { margin-left: auto; }
 
+/* `hidden` must win over the display a class sets, or the spinner stays up after the results. */
+[hidden] { display: none !important; }
 .loading { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px 0; color: var(--ink-2); }
 .spinner { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
