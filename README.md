@@ -4,6 +4,12 @@ A private knowledge base you can question. Put your PDFs, lecture notes, saved a
 
 Everything runs on your machine. The documents never leave it.
 
+![Hybrid search on the sample handbook: the expenses rule found first by both keyword and meaning search](docs/search.png)
+
+![An AI agent's answer checked with brain check: two wrong citations marked unverified](docs/check.png)
+
+The screenshots use the documents in [samples/](samples/), written for this demo.
+
 ---
 
 ## What makes this more than "documents in a prompt"
